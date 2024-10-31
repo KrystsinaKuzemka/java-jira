@@ -397,7 +397,6 @@ public class JiraWebhookController {
         try {
             RestTemplate restTemplate = new RestTemplate();
 
-            // Get all active tasks
             String jqlQuery = "status != Done";
             String taskUrl = jiraURL + "/rest/api/3/search?jql=" + jqlQuery + "&maxResults=1000";
             HttpEntity<String> requestEntity = new HttpEntity<>(createAuthHeaders());
@@ -406,7 +405,6 @@ public class JiraWebhookController {
             List<Map<String, Object>> issues = (List<Map<String, Object>>) taskResponse.getBody().get("issues");
             Map<String, UserTaskInfo> userTaskCounts = new HashMap<>();
 
-            // Count tasks only for users who have assignments
             for (Map<String, Object> issue : issues) {
                 Map<String, Object> fields = (Map<String, Object>) issue.get("fields");
                 Map<String, Object> assignee = (Map<String, Object>) fields.get("assignee");
@@ -423,7 +421,6 @@ public class JiraWebhookController {
                 return;
             }
 
-            // Find user with minimum tasks
             UserTaskInfo userWithMinTasks = userTaskCounts.values().stream()
                     .min(Comparator.comparingInt(UserTaskInfo::getTaskCount))
                     .orElseThrow(() -> new RuntimeException("Nie znaleziono uzytkownikow"));
